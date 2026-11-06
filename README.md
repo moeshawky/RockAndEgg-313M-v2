@@ -365,6 +365,21 @@ A new classification head is initialized and must be trained on the downstream t
 
 For reproducible comparison with the published frozen-probe results, use `AutoModel` and the specified pooling and probe protocol rather than assuming that full-model fine-tuning produces equivalent measurements.
 
+### Hands-on Kaggle classification tutorial
+
+The tutorial notebook demonstrates downstream classifier-head adaptation of the headless RockAndEgg backbones. The frozen-backbone workflow extracts representations across two NVIDIA Tesla T4 GPUs, trains a linear head on the cached features, and exports standard Transformers-compatible classifiers that reload independently with serialization parity (`reload_diff = 0.0` for all four exports).
+
+* **Kaggle notebook:** [rockandegg-v1-v2](https://www.kaggle.com/code/moeshawky/rockandegg-v1-v2) — run in 220.9s on 2× NVIDIA T4 GPUs; local copy at `notebooks/rockandegg-v1-v2.ipynb` in the [GitHub repository](https://github.com/moeshawky/RockAndEgg-313M-v2).
+* **AG News:** 4-way topic classification (World, Sports, Business, Sci/Tech). AG News was among v2's supervised foundation-training tasks, so this result is not independent out-of-distribution evidence.
+* **BANKING77:** 77-way banking-intent classification. BANKING77 is not among documented supervised continuation tasks; this tutorial makes no separate claim about whether the Qwen3 donor encountered BANKING77-like data during pretraining.
+
+| Dataset | v1 test accuracy | v2 test accuracy |
+|---|---:|---:|
+| AG News | 86.15% | 91.00% |
+| BANKING77 | 75.55% | 83.44% |
+
+These are downstream adaptation results — a trained classification head is required — not zero-shot scores for the released headless foundation model. Advanced partial-backbone fine-tuning is disabled (`RUN_ADVANCED=False`) and is not yet validated. Tutorial results are separate from the formal RAE-005 qualification tables above.
+
 ## Limitations and considerations
 
 **No pretrained decision head.** The checkpoint does not directly classify text into a predefined label space. Any task head must be trained and evaluated separately.
