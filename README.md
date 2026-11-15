@@ -441,6 +441,37 @@ Earlier TPU and CUDA dataset reconstruction paths were not established to be byt
 
 Likewise, the original surgery experiments, RAE-TPU-003 continuation, earlier RAE-DISP trials, and final RAE-005 comparison represent successive research phases, not interchangeable benchmark runs.
 
+## Quantization pipeline
+
+GGUF-conversion scripts and a test suite for deriving lower-precision storage formats from the FP16 checkpoint. GGUF binaries themselves are not published: RockAndEgg-313M-v2 is a headless `Qwen3Model` backbone for `transformers.AutoModel` feature extraction with a separately trained downstream head, and llama.cpp GGUF files are designed for text-generation inference — a headless GGUF cannot produce meaningful output for this model's intended use. Apache 2.0 permits redistribution, but publishing the GGUF binaries (~207–332 MB each) would add large files without serving the model's actual deployment path. The reproducible pipeline below lets anyone derive GGUF quantizations on demand:
+
+### Files
+
+| File | Purpose |
+|------|---------|
+| `quantization/convert_fp16_to_gguf.py` | Converts the FP16 safetensors checkpoint to a GGUF F16 baseline (Qwen3 metadata, 112 tensors mapped to GGUF names) |
+| `quantization/test_conversions.py` | Tensor-level fidelity tests against the base F32 checkpoint (31/31 passing) |
+
+### Workflow
+
+1. Derive an FP16 safetensors copy of the checkpoint (the base checkpoint stores F32 weights; the config `dtype` field says `bfloat16` but the safetensors payload is F32 — the config field is not the storage dtype).
+2. Run `convert_fp16_to_gguf.py` to write a self-contained Qwen3 GGUF F16 file.
+3. Run `llama-quantize` (build 11395) on the F16 GGUF to derive `Q4_K_M`, `Q4_K_S`, and `Q8_0` tiers.
+4. Run `test_conversions.py` to verify realised types match the requested mixture with zero silent demotions.
+
+### Results (against base F32 checkpoint)
+
+| Output | Type | Size | BPW | max_abs_diff vs F32 |
+|--------|------|------|-----|---------------------|
+| model-f16.gguf | F16 baseline | 625.8 MB | 16.00 | 1.48e-02 |
+| model-q4km.gguf | Q4_K_M | 211.3 MB | 5.66 | 4.40e-02 |
+| model-q4ks.gguf | Q4_K_S | 207.1 MB | 5.55 | 4.40e-02 |
+| model-q80.gguf | Q8_0 | 332.5 MB | 8.50 | 1.48e-02 |
+
+`Q8_0` is the correct 8-bit GGUF choice for llama.cpp — `GGMLQuantizationType` has no FP8 storage type (FP8 requires H100/B200 + Transformer Engine), and `Q8_0` has roughly the same footprint as FP8 with near-lossless quality vs F16.
+
+All conversions run CPU-only on Tesla T4 (4 cores, 31 GB RAM) via `/usr/local/lib/llama.cpp/llama-quantize`. Source checkpoint: `/kaggle/input/models/moeshawky/rockandegg-313m-v2/transformers/default/1`.
+
 ## Research references
 
 The following publications informed the project's architecture, experimental questions, or research context. Their roles are distinguished to avoid implying that every technique was implemented.
