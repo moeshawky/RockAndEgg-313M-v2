@@ -32,17 +32,7 @@ The model is released without a language-modeling head or task-specific classifi
 
 ## Why "RockAndEgg"?
 
-The name comes from an old Egyptian children's game.
-
-Children strike decorated eggs against one another, and the egg that survives wins. There is, however, a particularly effective way to cheat: paint a stone to resemble an egg.
-
-The question that gave the project its name was simple:
-
-*What would an ancient Egyptian classifier be?*
-
-A classifier worthy of the name should distinguish the painted stone from the real egg.
-
-RockAndEgg is the foundation that learns the representations. A downstream classification head is what ultimately catches the cheat.
+The name refers to the old Egyptian game in which children strike decorated eggs together, with the surviving egg winning. The trickster wins by painting a stone to look like an egg. A classifier, in the most literal possible sense, should be able to tell the rock from the egg.
 
 ## Model details
 
@@ -62,7 +52,7 @@ RockAndEgg is the foundation that learns the representations. A downstream class
 | Attention mechanism | Causal, grouped-query attention |
 | Vocabulary | 151,936 tokens |
 | Normalization | RMSNorm |
-| Weight format | FP32 safetensors |
+| Weight format | FP16 safetensors |
 | Configured context | 32,768 positions |
 | Evaluated sequence length | 128 tokens |
 | Intended interface | Hugging Face `AutoModel` |
