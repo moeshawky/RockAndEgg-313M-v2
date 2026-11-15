@@ -541,3 +541,39 @@ RAE-005 established a selected checkpoint, documented its transfer characteristi
 The broader objective remains the development of a compact, competitive language-understanding backbone, to be judged against independently trained alternatives under fair downstream evaluation.
 
 RockAndEgg remains an active applied model-development project.
+
+## Benchmark Results
+
+RAE-v2 was evaluated against matched BERT/DeBERTa baselines on 2× Tesla T4 GPUs across 10 clean-transfer classification tasks (5 seeds each). Full results: [`benchmarks/RAE_BENCHMARK_REPORT.md`](benchmarks/RAE_BENCHMARK_REPORT.md).
+
+### Fine-tuned results (test metric, mean ± std, 5 seeds)
+
+| Task | RAE-v2 | bert-base+recipe | deberta-v3-base+recipe |
+|------|--------|-----------------|----------------------|
+| STS-B (Spearman) | 0.8610 ± 0.0019 | 0.8683 ± 0.0040 | 0.8878 ± 0.0022 |
+| RTE (Accuracy) | 0.6693 ± 0.0146 | 0.6715 ± 0.0171 | 0.8152 ± 0.0176 |
+| MRPC (Accuracy) | 0.7951 ± 0.0179 | 0.8216 ± 0.0209 | 0.8676 ± 0.0046 |
+| CoLA (MCC) | 0.4727 ± 0.0324 | 0.5374 ± 0.0184 | 0.6198 ± 0.0038 |
+| QNLI (Accuracy) | 0.8724 ± 0.0023 | 0.8708 ± 0.0108 | 0.9145 ± 0.0011 (3 seeds) |
+| PAWS (Accuracy) | 0.9163 ± 0.0012 | 0.8087 ± 0.0196 | — |
+| TREC (Accuracy) | 0.9764 ± 0.0043 | 0.9552 ± 0.0145 | — |
+| BANKING77 (Accuracy) | 0.8928 ± 0.0031 | 0.6888 ± 0.0141 | — |
+| Emotion (Accuracy) | 0.9288 ± 0.0012 | 0.9235 ± 0.0019 | — |
+| SciTail (Accuracy) | — | — | — |
+
+### Claim verdicts
+
+| Claim | Name | Verdict |
+|-------|------|---------|
+| A | Pareto (throughput ≥ 1.0×) | FAIL — throughput is 0.33× bert-base |
+| B | Data Efficiency | INCONCLUSIVE — low-data not executed |
+| C | Multilingual/Robustness | NOT EVALUATED — Stage 5 not executed |
+| D | Parity at Lower Cost | FAIL — throughput is 0.33× deberta-v3-base |
+| E | Frozen Quality | INCONCLUSIVE — recipe frozen probes not executed |
+
+### Key takeaways
+
+- **RAE-v2 beats bert-base+recipe on 5 of 9 common tasks** (banking77 +0.204, paws +0.108, trec +0.021, emotion +0.005, qnli +0.002; 3 wins at p < 0.05).
+- **RAE-v2 trails deberta-v3-base+recipe on all 4 common tasks** (cola −0.147, rte −0.146, mrpc −0.073, stsb −0.027; all at p < 0.005).
+- **Throughput is the binding constraint:** 0.33× bert-base even with true FP16 storage. Not suitable for throughput-constrained deployment without quantization optimization.
+- **deberta-v3-base+recipe partial:** Only 4 of 10 tasks complete at time of publication; remaining tasks pending due to T4 time constraints.

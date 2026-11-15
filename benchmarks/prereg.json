@@ -1,0 +1,51 @@
+{
+  "mission": "Determine whether RockAndEgg-313M-v2 beats matched BERT/DeBERTa baselines and in which regimes.",
+  "subject": {
+    "id": "rae-v2",
+    "path": "/kaggle/input/models/moeshawky/rockandegg-313m-v2/transformers/default/1",
+    "sha256": "191d9597f60bb1350b66d7d1f5bd71410c716c6cd005334f4e61bc10f40a713b",
+    "architecture": "Qwen3Model, 10 layers, hidden 1024, ~312.9M params (~156M embedding, ~157M compute)"
+  },
+  "claims": {
+    "A": {
+      "name": "Pareto",
+      "statement": "at equal or better measured throughput, RAE-v2 matches or beats deberta-v3-base+recipe on clean-transfer fine-tuning",
+      "pass_criterion": "Throughput ratio >= 1.0 (fp16, 128, bs 64) AND CI lower bound of macro delta > 0 AND wins on >= 6 of 10 tasks",
+      "status": "pending"
+    },
+    "B": {
+      "name": "Data efficiency",
+      "statement": "at 1% and 10% of capped training data, RAE-v2 beats bert-base+recipe and deberta-v3-base+recipe",
+      "pass_criterion": "Same statistical criterion as A, separately at each budget (1% and 10%)",
+      "status": "pending"
+    },
+    "C": {
+      "name": "Multilingual and robustness",
+      "statement": "after fine-tuning on 50k English MNLI, RAE-v2 beats xlm-roberta-base and mdeberta-v3-base on XNLI (non-English macro-average), and is within error of or above deberta-v3-base on HANS and ANLI",
+      "pass_criterion": "CI lower bound of XNLI non-English delta > 0",
+      "status": "pending"
+    },
+    "D": {
+      "name": "Parity at lower cost",
+      "statement": "RAE-v2 is non-inferior to deberta-v3-large",
+      "pass_criterion": "Throughput ratio >= 1.5 AND CI lower bound of clean-transfer macro delta > -1.0 point",
+      "status": "pending"
+    },
+    "E": {
+      "name": "Frozen quality",
+      "statement": "frozen-probe clean-transfer macro-average beats deberta-v3-base+recipe",
+      "pass_criterion": "CI lower bound > 0 under both linear and MLP probes",
+      "status": "pending"
+    }
+  },
+  "controls": [
+    "effect of the recipe on baselines",
+    "effect of the recipe on RAE (RAE-v2 vs truncated-Qwen3-raw)",
+    "pooling-grid winners"
+  ],
+  "clean_tasks": ["stsb","rte","mrpc","cola","qnli","paws","trec","banking77","emotion","scitail"],
+  "diagnostic_tasks": ["sst2","agnews","mnli","qqp"],
+  "seeds": [13, 21, 34, 55, 89],
+  "macro_average_rule": "clean-transfer and trained-on diagnostics reported separately; never blended",
+  "status": "written_before_stage4"
+}
